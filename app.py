@@ -3,7 +3,7 @@ import os
 from src.auth import authenticate_user, create_user, get_all_users, update_user_password, delete_user
 from src.tasks import get_sorted_tasks, claim_task, complete_task, create_task, delete_task, get_task_history, update_task
 
-st.set_page_config(page_title="Pato da Vida", page_icon="🏰", layout="wide")
+st.set_page_config(page_title="Patô da Vida", page_icon="🏰", layout="wide")
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -24,7 +24,7 @@ def show_login_page():
         except Exception as e:
             pass # Se a imagem não for encontrada, ele simplesmente ignora e não quebra o app
             
-    st.markdown("<h1 style='text-align: center;'>🏰 Pato da Vida</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>🏰 Patô da Vida</h1>", unsafe_allow_html=True)
     st.markdown("<h4 style='text-align: center;'>O Castelo precisa de vocês!</h4>", unsafe_allow_html=True)
     st.write("") # Espaço em branco
     
@@ -63,7 +63,7 @@ def show_dashboard():
         st.session_state.logged_in = False
         st.rerun()
         
-    st.title("🏰 Pato da Vida - Missões Diárias")
+    st.title("🏰 Patô da Vida - Missões Diárias")
     
     if is_admin:
         tabs = st.tabs(["🏠 Dashboard (Home)", "📊 Histórico", "⚙️ Configurações (Admin)"])
@@ -76,7 +76,7 @@ def show_dashboard():
     with tab_home:
         tasks = get_sorted_tasks()
         if not tasks:
-            st.warning("Nenhuma missão cadastrada no momento. O Pato está descansando!")
+            st.warning("Nenhuma missão cadastrada no momento. O Patô está descansando!")
         else:
             for task in tasks:
                 with st.container():
@@ -121,7 +121,7 @@ def show_dashboard():
         else:
             st.dataframe(df_hist, use_container_width=True, hide_index=True)
             st.divider()
-            st.subheader("🏆 Ranking do Pato (Quem fez mais)")
+            st.subheader("🏆 Ranking do Patô (Quem fez mais)")
             ranking = df_hist['Morador'].value_counts().reset_index()
             ranking.columns = ['Morador', 'Total de Tarefas']
             st.bar_chart(data=ranking, x='Morador', y='Total de Tarefas')
