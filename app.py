@@ -1,8 +1,9 @@
 import streamlit as st
+import os
 from src.auth import authenticate_user, create_user, get_all_users, update_user_password, delete_user
 from src.tasks import get_sorted_tasks, claim_task, complete_task, create_task, delete_task, get_task_history, update_task
 
-st.set_page_config(page_title="Gerenciador de Tarefas Domésticas", layout="wide")
+st.set_page_config(page_title="Pato da Vida", page_icon="🏰", layout="wide")
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -15,34 +16,54 @@ def main():
         show_dashboard()
 
 def show_login_page():
-    st.title("🏠 Gerenciador Doméstico")
-    st.subheader("Acesso Restrito")
+    # 1. IMAGEM NA TELA DE LOGIN (Centralizada)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        try:
+            st.image("assets/familia.png", use_container_width=True)
+        except Exception as e:
+            pass # Se a imagem não for encontrada, ele simplesmente ignora e não quebra o app
+            
+    st.markdown("<h1 style='text-align: center;'>🏰 Pato da Vida</h1>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center;'>O Castelo precisa de vocês!</h4>", unsafe_allow_html=True)
+    st.write("") # Espaço em branco
     
-    with st.form("login_form"):
-        user = st.text_input("Usuário")
-        pw = st.text_input("Senha", type="password")
-        if st.form_submit_button("Entrar"):
-            user_data = authenticate_user(user, pw)
-            if user_data:
-                st.session_state.logged_in = True
-                st.session_state.user_info = user_data
-                st.rerun()
-            else: 
-                st.error("Credenciais inválidas ou usuário inexistente.")
+    # Centralizando o formulário de login
+    login_col1, login_col2, login_col3 = st.columns([1, 2, 1])
+    with login_col2:
+        with st.form("login_form"):
+            user = st.text_input("Usuário")
+            pw = st.text_input("Senha", type="password")
+            submit_btn = st.form_submit_button("Entrar no Castelo", use_container_width=True)
+            
+            if submit_btn:
+                user_data = authenticate_user(user, pw)
+                if user_data:
+                    st.session_state.logged_in = True
+                    st.session_state.user_info = user_data
+                    st.rerun()
+                else: 
+                    st.error("Credenciais inválidas ou usuário inexistente.")
 
 def show_dashboard():
     is_admin = st.session_state.user_info.get('role', 'user') == 'admin'
     perfil_nome = "Administrador" if is_admin else "Usuário Padrão"
     
+    # 2. IMAGEM NO MENU LATERAL
+    try:
+        st.sidebar.image("assets/familia.png", use_container_width=True)
+    except:
+        pass
+        
     st.sidebar.write(f"Olá, **{st.session_state.user_info['full_name']}**")
     st.sidebar.caption(f"Perfil: {perfil_nome}")
     st.sidebar.divider()
     
-    if st.sidebar.button("Sair"):
+    if st.sidebar.button("Sair do Castelo", use_container_width=True):
         st.session_state.logged_in = False
         st.rerun()
         
-    st.title("📋 Gerenciador de Tarefas Domésticas")
+    st.title("🏰 Pato da Vida - Missões Diárias")
     
     if is_admin:
         tabs = st.tabs(["🏠 Dashboard (Home)", "📊 Histórico", "⚙️ Configurações (Admin)"])
@@ -55,7 +76,7 @@ def show_dashboard():
     with tab_home:
         tasks = get_sorted_tasks()
         if not tasks:
-            st.warning("Nenhuma tarefa cadastrada no momento.")
+            st.warning("Nenhuma missão cadastrada no momento. O Pato está descansando!")
         else:
             for task in tasks:
                 with st.container():
@@ -96,18 +117,17 @@ def show_dashboard():
         st.subheader("📜 Histórico de Conclusões")
         df_hist = get_task_history()
         if df_hist.empty:
-            st.info("Ninguém concluiu nenhuma tarefa ainda.")
+            st.info("Ninguém concluiu nenhuma missão ainda.")
         else:
             st.dataframe(df_hist, use_container_width=True, hide_index=True)
             st.divider()
-            st.subheader("🏆 Ranking de Moradores")
+            st.subheader("🏆 Ranking do Pato (Quem fez mais)")
             ranking = df_hist['Morador'].value_counts().reset_index()
             ranking.columns = ['Morador', 'Total de Tarefas']
             st.bar_chart(data=ranking, x='Morador', y='Total de Tarefas')
 
     if tab_admin is not None:
         with tab_admin:
-            # 1. BLOCO DE CRIAÇÃO
             st.subheader("➕ Cadastrar Nova Rotina")
             with st.form("new_task_form"):
                 t_name = st.text_input("Nome da Tarefa")
@@ -123,19 +143,15 @@ def show_dashboard():
             
             st.divider()
 
-            # 2. NOVO BLOCO: EDITAR ROTINAS
             st.subheader("✏️ Editar Rotina Existente")
             admin_tasks = get_sorted_tasks()
             if admin_tasks:
                 task_dict = {str(t['_id']): t for t in admin_tasks}
-                
-                # Seleciona a tarefa fora do formulário para carregar os dados dinamicamente
                 selected_task_id = st.selectbox(
                     "Selecione a Rotina para alterar:", 
                     options=list(task_dict.keys()), 
                     format_func=lambda x: task_dict[x]['task_name']
                 )
-                
                 selected_task = task_dict[selected_task_id]
                 
                 with st.form("edit_task_form"):
@@ -154,7 +170,6 @@ def show_dashboard():
             
             st.divider()
             
-            # 3. BLOCO DE EXCLUSÃO DE ROTINAS
             st.subheader("🗑️ Remover Rotinas")
             if admin_tasks:
                 for t in admin_tasks:
@@ -171,7 +186,6 @@ def show_dashboard():
 
             st.divider()
             
-            # 4. BLOCOS DE USUÁRIOS
             st.subheader("👤 Cadastrar Novo Morador")
             with st.form("admin_signup_form"):
                 new_user = st.text_input("Usuário de Login")
