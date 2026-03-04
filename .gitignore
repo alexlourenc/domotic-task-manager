@@ -1,0 +1,21 @@
+# .gitignore
+
+# Python virtual environment
+# Ambiente virtual Python
+venv/
+__pycache__/
+*.pyc
+
+# Streamlit secrets and logs
+# Segredos e logs do Streamlit
+.streamlit/secrets.toml
+.streamlit/config.toml
+
+# OS generated files
+# Arquivos gerados pelo sistema operacional
+.DS_Store
+Thumbs.db
+
+# Environment variables
+# Variáveis de ambiente
+.env

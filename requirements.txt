@@ -1,0 +1,7 @@
+# requirements.txt
+streamlit # Framework para a interface web / Web interface framework
+pymongo # Driver de conexão para o MongoDB / MongoDB connection driver
+dnspython # Suporte para URIs do MongoDB Atlas / Support for MongoDB Atlas URIs
+pandas # Manipulação de dados e tabelas / Data and table manipulation
+bcrypt # Criptografia segura de senhas / Secure password hashing
+python-dotenv # Gestão de variáveis de ambiente / Environment variable management
