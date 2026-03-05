@@ -5,6 +5,23 @@ from src.tasks import get_sorted_tasks, claim_task, complete_task, create_task, 
 
 st.set_page_config(page_title="Pato da Vida", page_icon="🏰", layout="wide")
 
+# --- INÍCIO DO CÓDIGO PARA ESCONDER A CARA DO STREAMLIT ---
+esconder_estilo = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            /* Deixa o aplicativo mais colado no topo do celular */
+            .block-container {
+                padding-top: 2rem;
+                padding-bottom: 0rem;
+            }
+            </style>
+            """
+st.markdown(esconder_estilo, unsafe_allow_html=True)
+
+
+
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
     st.session_state.user_info = None
