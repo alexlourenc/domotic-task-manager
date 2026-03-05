@@ -7,10 +7,11 @@ import pandas as pd
 def calculate_next_run(interval_hours):
     return datetime.utcnow() + timedelta(hours=interval_hours)
 
-def create_task(name, interval_hours):
+def create_task(name, interval_hours, room="Geral"):
     tasks_col = get_collection("tasks")
     new_task = {
         "task_name": name,
+        "room": room,
         "interval_hours": interval_hours,
         "status": "open", 
         "current_user": None,
@@ -73,7 +74,8 @@ def get_sorted_tasks():
                 task["status"] = "open"
                 tasks_col.update_one({"_id": task["_id"]}, {"$set": {"status": "open"}})
                 
-                msg = f"🚨 *TAREFA VENCIDA!* 🚨\n\nA rotina *{task['task_name']}* está em aberto e aguardando alguém assumir!"
+                comodo = task.get('room', 'Geral')
+                msg = f"🚨 *MISSÃO VENCIDA!* 🚨\n\n📍 *Local:* {comodo}\n🧹 *Tarefa:* {task['task_name']}\n\nO castelo aguarda um herói!"
                 send_telegram_alert(msg)
     
     df = pd.DataFrame(all_tasks)
@@ -81,7 +83,17 @@ def get_sorted_tasks():
     
     df['sort_order'] = df['status'].map({'open': 0, 'in_progress': 1, 'finished': 2})
     df = df.sort_values(by=['sort_order', 'seconds_remaining'])
-    return df.to_dict('records')
+    
+    records = df.to_dict('records')
+    
+    # 🛠️ CORREÇÃO DO ERRO AQUI:
+    # Varremos a lista e transformamos qualquer "NaN" (Not a Number) gerado pelo Pandas
+    # em uma String normal chamada "Geral", para o aplicativo não quebrar na hora de ordenar.
+    for t in records:
+        if not isinstance(t.get('room'), str):
+            t['room'] = 'Geral'
+            
+    return records
 
 def get_task_history():
     tasks_col = get_collection("tasks")
@@ -90,8 +102,10 @@ def get_task_history():
     history_list = []
     for task in all_tasks:
         task_name = task["task_name"]
+        room_name = task.get("room", "Geral")
         for entry in task.get("history", []):
             history_list.append({
+                "Cômodo": room_name,
                 "Tarefa": task_name,
                 "Morador": entry["user"],
                 "Data/Hora (UTC)": entry["completed_at"]
@@ -104,15 +118,15 @@ def get_task_history():
     df["Data/Hora"] = pd.to_datetime(df["Data/Hora (UTC)"]) - pd.Timedelta(hours=3)
     df = df.sort_values(by="Data/Hora", ascending=False)
     df["Data/Hora"] = df["Data/Hora"].dt.strftime('%d/%m/%Y %H:%M')
-    return df[["Tarefa", "Morador", "Data/Hora"]]
+    return df[["Cômodo", "Tarefa", "Morador", "Data/Hora"]]
 
-# NOVA FUNÇÃO: Atualizar o nome e o intervalo de uma tarefa existente
-def update_task(task_id: str, new_name: str, new_interval: int):
+def update_task(task_id: str, new_name: str, new_interval: int, new_room: str):
     tasks_col = get_collection("tasks")
     tasks_col.update_one(
         {"_id": ObjectId(task_id)},
         {"$set": {
             "task_name": new_name,
-            "interval_hours": new_interval
+            "interval_hours": new_interval,
+            "room": new_room
         }}
     )
