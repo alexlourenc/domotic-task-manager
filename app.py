@@ -82,19 +82,17 @@ def show_dashboard():
             for comodo in comodos_existentes:
                 tarefas_do_comodo = [t for t in tasks if t.get('room', 'Geral') == comodo]
                 
-                # 1. Conta quantas tarefas estão com status "open" (em aberto/atrasadas) neste cômodo
+                # 1. Conta quantas tarefas estão com status "open" (em aberto/atrasadas)
                 tarefas_atrasadas = len([t for t in tarefas_do_comodo if t['status'] == 'open'])
                 
-                # 2. Define o título do Card e se ele deve começar aberto ou fechado
+                # 2. Define o título do Card
                 if tarefas_atrasadas > 0:
                     titulo_card = f"📍 {comodo} — 🔴 {tarefas_atrasadas} pendente(s)"
-                    iniciar_aberto = True # Card fica aberto para chamar atenção
                 else:
                     titulo_card = f"📍 {comodo} — ✅ Tudo limpo"
-                    iniciar_aberto = False # Card fica fechado pois o cômodo está ok
                 
-                # 3. Cria o Card expansível (o usuário pode clicar para abrir/fechar)
-                with st.expander(titulo_card, expanded=iniciar_aberto):
+                # 3. Cria o Card expansível (SEMPRE FECHADO POR PADRÃO usando expanded=False)
+                with st.expander(titulo_card, expanded=False):
                     for task in tarefas_do_comodo:
                         with st.container(border=True): 
                             col1, col2, col3 = st.columns([3, 2, 2])
