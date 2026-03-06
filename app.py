@@ -3,7 +3,7 @@ import os
 from src.auth import authenticate_user, create_user, get_all_users, update_user_password, delete_user
 from src.tasks import get_sorted_tasks, claim_task, complete_task, create_task, delete_task, get_task_history, update_task
 
-st.set_page_config(page_title="Pato da Vida", page_icon="🏰", layout="wide")
+st.set_page_config(page_title="Patô da Vida", page_icon="🏰", layout="wide")
 
 # --- INÍCIO DO CÓDIGO PARA ESCONDER A CARA DO STREAMLIT ---
 esconder_estilo = """
@@ -42,7 +42,7 @@ def show_login_page():
         except Exception as e:
             pass
             
-    st.markdown("<h1 style='text-align: center;'>🏰 Pato da Vida</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>🏰 Patô da Vida</h1>", unsafe_allow_html=True)
     st.markdown("<h4 style='text-align: center;'>O Castelo precisa de vocês!</h4>", unsafe_allow_html=True)
     st.write("")
     
@@ -79,7 +79,7 @@ def show_dashboard():
         st.session_state.logged_in = False
         st.rerun()
         
-    st.title("🏰 Pato da Vida - Missões Diárias")
+    st.title("🏰 Patô da Vida - Missões Diárias")
     
     if is_admin:
         tabs = st.tabs(["🏠 Dashboard (Home)", "📊 Histórico", "⚙️ Configurações (Admin)"])
